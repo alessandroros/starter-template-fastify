@@ -1,0 +1,99 @@
+import type { FastifyInstance } from "fastify";
+import type { MessageHandler } from "./message.handler.js";
+import {
+    MESSAGE_CACHE_NAMESPACE,
+    MESSAGE_CACHE_TTL_SECONDS,
+    MESSAGE_RATE_LIMIT_MAX,
+    MESSAGE_RATE_LIMIT_TIME_WINDOW,
+} from "./message.constant.js";
+import {
+    createMessageBodySchema,
+    updateMessageBodySchema,
+    messageIdParamSchema,
+    fetchMessagesQuerySchema,
+    enqueueMessageResponseSchema,
+    fetchMessagesResponseSchema,
+} from "@/lib/validation/message/message.schema.js";
+
+const MESSAGE_TAG = "message";
+
+enum MessageRoute {
+    Root = "/",
+    ById = "/:id",
+}
+
+export const createMessageRoutes = (
+    fastify: FastifyInstance,
+    messageHandler: MessageHandler
+): void => {
+    fastify.post(
+        MessageRoute.Root,
+        {
+            schema: {
+                tags: [MESSAGE_TAG],
+                summary: "Enqueue message creation",
+                body: createMessageBodySchema,
+                response: {
+                    202: enqueueMessageResponseSchema,
+                },
+            },
+        },
+        messageHandler.createMessage
+    );
+
+    fastify.put(
+        MessageRoute.ById,
+        {
+            schema: {
+                tags: [MESSAGE_TAG],
+                summary: "Enqueue message update",
+                params: messageIdParamSchema,
+                body: updateMessageBodySchema,
+                response: {
+                    200: enqueueMessageResponseSchema,
+                },
+            },
+        },
+        messageHandler.updateMessage
+    );
+
+    fastify.delete(
+        MessageRoute.ById,
+        {
+            schema: {
+                tags: [MESSAGE_TAG],
+                summary: "Enqueue message deletion",
+                params: messageIdParamSchema,
+                response: {
+                    200: enqueueMessageResponseSchema,
+                },
+            },
+        },
+        messageHandler.deleteMessage
+    );
+
+    fastify.get(
+        MessageRoute.Root,
+        {
+            config: {
+                cache: {
+                    ttl: MESSAGE_CACHE_TTL_SECONDS,
+                    namespace: MESSAGE_CACHE_NAMESPACE,
+                },
+                rateLimit: {
+                    max: MESSAGE_RATE_LIMIT_MAX,
+                    timeWindow: MESSAGE_RATE_LIMIT_TIME_WINDOW,
+                },
+            },
+            schema: {
+                tags: [MESSAGE_TAG],
+                summary: "Fetch messages",
+                querystring: fetchMessagesQuerySchema,
+                response: {
+                    200: fetchMessagesResponseSchema,
+                },
+            },
+        },
+        messageHandler.getMessages
+    );
+};

@@ -1,0 +1,34 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator json {
+  provider = "prisma-json-types-generator"
+}
+
+generator dbml {
+  provider            = "prisma-dbml-generator"
+  output              = "../dbml"
+  outputName          = "schema.dbml"
+  projectName         = "Project Name"
+  projectDatabaseType = "PostgreSQL"
+  projectNote         = "ER Diagram"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Message {
+  id        String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  text String
+
+  /// [MessageMeta]
+  meta Json?
+
+  @@map("messages")
+}

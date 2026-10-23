@@ -1,0 +1,64 @@
+import Fastify from "fastify";
+import autoload from "@fastify/autoload";
+import path, { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import type { FastifyInstance } from "fastify";
+import { resolveTrustProxy } from "@/lib/proxy/proxy.util.js";
+import { ENV_TO_LOGGER, GCP_LOGGER } from "@/lib/constants/logger.constant.js";
+import { QUEUE_WORKER_PLUGIN_PATTERN } from "@/lib/constants/bullmq.constant.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+type ConfigureServerOptions = {
+    registerRoutes?: boolean;
+    runQueueWorker?: boolean;
+};
+
+export const configureServer = async ({
+    registerRoutes = true,
+    runQueueWorker = true,
+}: ConfigureServerOptions = {}): Promise<FastifyInstance> => {
+    const nodeEnv = process.env.NODE_ENV as
+        | keyof typeof ENV_TO_LOGGER
+        | undefined;
+
+    const fastify = Fastify({
+        trustProxy: resolveTrustProxy(process.env.TRUSTED_PROXY_HOPS),
+        logger: (nodeEnv && ENV_TO_LOGGER[nodeEnv]) ?? GCP_LOGGER,
+    });
+
+    try {
+        await fastify.register(autoload, {
+            dir: path.join(__dirname, "plugins"),
+            forceESM: true,
+            ...(runQueueWorker
+                ? {}
+                : { ignoreFilter: QUEUE_WORKER_PLUGIN_PATTERN }),
+        });
+
+        await fastify.register(autoload, {
+            dir: path.join(
+                __dirname,
+                registerRoutes ? "modules" : "modules/application"
+            ),
+            dirNameRoutePrefix: false,
+            forceESM: true,
+
+            maxDepth: 1,
+            matchFilter: /\/index\.(ts|js)$/,
+        });
+
+        fastify.addHook("onClose", async () => {
+            // Close all active connections here or directly inside the plugin.
+        });
+
+        await fastify.ready();
+    } catch (err) {
+        fastify.log.fatal(err, "failed to configure server");
+
+        process.exit(1);
+    }
+
+    return fastify;
+};
