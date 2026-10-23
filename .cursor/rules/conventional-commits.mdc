@@ -1,0 +1,21 @@
+---
+description: Convenzione per messaggi di commit e titoli di PR
+alwaysApply: true
+---
+
+# Conventional Commits
+
+Usa sempre la convenzione Conventional Commits 1.0.0 (https://www.conventionalcommits.org/en/v1.0.0/) per ogni messaggio di commit e per i titoli delle PR.
+
+Formato: `<type>[scope opzionale][!]: <descrizione>`
+
+- `type`: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert.
+- Descrizione all'imperativo, minuscola, senza punto finale, idealmente ≤ 72 caratteri.
+- Breaking change: `!` dopo type/scope e/o footer `BREAKING CHANGE: <descrizione>`.
+- Un commit = una modifica logica.
+
+```
+feat(book): add author and book endpoints
+
+fix(author): return 404 when the author is missing
+```
