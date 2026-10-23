@@ -7,6 +7,10 @@ import type { PrismaClient } from "@prisma/client";
 import type { Storage } from "@google-cloud/storage";
 import type { CacheService } from "@/lib/cache/cache.service.js";
 import type { IpBanService } from "@/lib/ipBan/ipBan.service.js";
+import type { BookService } from "@/modules/book/book.service.js";
+import type { BookHandler } from "@/modules/book/book.handler.js";
+import type { AuthorService } from "@/modules/author/author.service.js";
+import type { AuthorHandler } from "@/modules/author/author.handler.js";
 import type { S3BucketService } from "@/lib/s3Bucket/s3Bucket.service.js";
 import type { MessageService } from "@/modules/message/message.service.js";
 import type { MessageHandler } from "@/modules/message/message.handler.js";
@@ -14,8 +18,10 @@ import type { MessageJobData } from "@/modules/message/mq/message.type.js";
 import type { GcpBucketService } from "@/lib/gcpBucket/gcpBucket.service.js";
 import type { MessageJobName } from "@/modules/message/mq/message.constant.js";
 import type { MessageJobService } from "@/modules/message/mq/message.service.js";
+import type { BookRepository } from "@/database/repositories/book/book.repository.js";
 import type { ApplicationService } from "@/modules/application/application.service.js";
 import type { ApplicationHandler } from "@/modules/application/application.handler.js";
+import type { AuthorRepository } from "@/database/repositories/author/author.repository.js";
 import type { MessageRepository } from "@/database/repositories/message/message.repository.js";
 
 export type Cradle = {
@@ -35,6 +41,14 @@ export type Cradle = {
     messageService: MessageService;
     messageJobService: MessageJobService;
     messageHandler: MessageHandler;
+
+    authorRepository: AuthorRepository;
+    authorService: AuthorService;
+    authorHandler: AuthorHandler;
+
+    bookRepository: BookRepository;
+    bookService: BookService;
+    bookHandler: BookHandler;
 
     cacheService: CacheService;
     ipBanService: IpBanService;

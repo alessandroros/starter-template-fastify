@@ -12,4 +12,14 @@ export const RESPONSE_MESSAGES = {
         unknownJobName: "Unknown message job name",
         updateEmpty: "At least one field must be provided.",
     },
+    author: {
+        created: "Author created successfully.",
+        fetched: "Authors fetched successfully.",
+        notFound: "Author not found.",
+    },
+    book: {
+        created: "Book created successfully.",
+        fetched: "Books fetched successfully.",
+        notFound: "Book not found.",
+    },
 } as const;

@@ -32,3 +32,28 @@ model Message {
 
   @@map("messages")
 }
+
+model Author {
+  id        String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  name  String
+  books Book[]
+
+  @@map("authors")
+}
+
+model Book {
+  id        String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  title    String
+  authorId String @map("author_id") @db.Uuid
+  // Restrict so a book cannot outlive its author. Postgres does not index foreign keys.
+  author   Author @relation(fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@index([authorId])
+  @@map("books")
+}
